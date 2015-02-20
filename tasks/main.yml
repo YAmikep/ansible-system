@@ -1,30 +1,19 @@
 ---
-#
-# Manages system wide settings (locale, packages)
-#
-# DEBUG: run with --extra-vars="playbook_debug=yes"
-#
-# USAGE:
-# See the defaults variables
-#
-# - {
-#     role: system,
-#     system_packages: ["git"],
-#     system_locale: "en_US.UTF-8",
-#   }
 
-### DEBUG
-- name: debug
-  debug: msg={{ system_locale }} {{ system_packages }}
+# DEBUG
+- name: debug variables
+  debug: var={{ item }}
   when: playbook_debug is defined and playbook_debug
-#######
+  with_items:
+    - system_locale
+    - system_packages
 
 
 - name: ensure packages state
   sudo: yes
-  apt: name={{item.name | default(item)}} state={{item.state | default('present')}} update_cache=yes cache_valid_time=7200
+  apt: name={{ item.name | default(item) }} state={{ item.state | default('present') }} update_cache=yes cache_valid_time=7200
   with_items: system_packages
 
 - name: set locale
   sudo: yes
-  command: /usr/sbin/update-locale LANG={{system_locale}} LC_ALL={{system_locale}}
+  command: /usr/sbin/update-locale LANG={{ system_locale }} LC_ALL={{ system_locale }}
